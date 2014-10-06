@@ -56,7 +56,7 @@ func handleRequest(conn net.Conn) {
 	//parse request
 	contents := string(buf[:reqLen])
 	header := strings.Split(contents, "\n")
-	request := findMethod(header[0])
+	request := parseRequest(header[0])
 
 	log.Printf("[INFO]\t\tmethod       :%v\n", request.Method)
 	log.Printf("[INFO]\t\tpage         :%v\n", request.Html)
@@ -72,7 +72,7 @@ func handleRequest(conn net.Conn) {
 	//conn.Write([]byte("Message received."))
 }
 
-func findMethod(str string) Request {
+func parseRequest(str string) Request {
 	reg, _ := regexp.Compile("(?m)([A-Z]+)")
 
 	method := reg.FindString(str)
