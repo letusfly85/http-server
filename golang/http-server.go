@@ -9,8 +9,10 @@
 package main
 
 import (
+	"log"
 	"net"
-	"os"
+	"regexp"
+	"strings"
 )
 
 const (
@@ -19,40 +21,63 @@ const (
 	CONN_TYPE = "tcp"
 )
 
+type Request struct {
+	Method string
+	Html   string
+}
+
+func check(err error) {
+	if err != nil {
+		log.Fatal("[ERROR]\t%v", err)
+	}
+}
+
 func main() {
 	l, err := net.Listen(CONN_TYPE, CONN_HOST+":"+CONN_PORT)
-	if err != nil {
-		println("Error listening:", err.Error())
-		os.Exit(1)
-	}
-
+	check(err)
 	defer l.Close()
-
-	println("Listening on " + CONN_HOST + ":" + CONN_PORT)
+	log.Printf("[INFO]\tlistening...\t:%v:%v\n", CONN_HOST, CONN_PORT)
 
 	for {
 		conn, err := l.Accept()
-		if err != nil {
-			println("Error accepting: ", err.Error())
-			os.Exit(1)
-		}
+		check(err)
 
 		go handleRequest(conn)
 	}
 }
 
 func handleRequest(conn net.Conn) {
+	defer conn.Close()
 	buf := make([]byte, 1024)
 
 	reqLen, err := conn.Read(buf)
-	if err != nil {
-		println("Error reading:", err.Error())
+	check(err)
+
+	//parse request
+	contents := string(buf[:reqLen])
+	header := strings.Split(contents, "\n")
+	request := findMethod(header[0])
+
+	log.Printf("[INFO]\t\tmethod       :%v\n", request.Method)
+	log.Printf("[INFO]\t\tpage         :%v\n", request.Html)
+
+	//TODO parse json object
+	for i, _ := range header[1:] {
+		log.Printf("[INFO]\t\treply message:%v\n", header[i+1])
 	}
 
-	conn.Write([]byte("Message received."))
+	//TODO: generate response body
 
-	s := string(buf[:reqLen])
-	println(s)
+	//TODO: reply response
+	//conn.Write([]byte("Message received."))
+}
 
-	conn.Close()
+func findMethod(str string) Request {
+	reg, _ := regexp.Compile("(?m)([A-Z]+)")
+
+	method := reg.FindString(str)
+	html := strings.Replace(str, method+" ", "", 1)
+	html = strings.Replace(html, " HTTP/1.1", "", 1)
+
+	return Request{Method: method, Html: html}
 }
