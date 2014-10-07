@@ -120,6 +120,7 @@ func handleRequest(conn net.Conn) {
 		//TODO: generate response body
 		responseGetMethod(conn, request)
 	}
+	conn.Close()
 	io.Copy(conn, conn)
 }
 
@@ -144,13 +145,11 @@ func parseRequest(str string) Request {
 /**
  * * GET要求への処理
  * ** ページ指定がない場合は、index.htmlをデフォルトページとして返却する
- * todo connを使いまわしているのでio.Copyするように改修する
  *
- *
+ * TODO: page要求とfavicon要求が来た際に、両方を返却してブラウザ編集が継続できるように改修
  *
  */
 func responseGetMethod(conn net.Conn, request Request) {
-	defer conn.Close()
 	if request.Html == "/" {
 		request.Html = "/index.html"
 	}
@@ -159,12 +158,11 @@ func responseGetMethod(conn net.Conn, request Request) {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		msg := fmt.Sprintf("[WARN]\t\t%v\n", err)
 		printOut(msg, yellow, nil)
-		//TODO ページが存在しない場合は404エラーを返却するようにする
-
-	} else {
-		htmlData, err := ioutil.ReadFile(path)
-		check(err)
-
-		conn.Write(htmlData)
+		// ページが存在しない場合は404エラーを返却するようにする
+		path = HTML_DIR + "/404.html"
 	}
+
+	htmlData, err := ioutil.ReadFile(path)
+	check(err)
+	conn.Write(htmlData)
 }
