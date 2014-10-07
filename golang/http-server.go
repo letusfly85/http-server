@@ -10,6 +10,7 @@ package main
 
 //TODO https://github.com/op/go-logging を利用する
 import (
+	"github.com/fatih/color"
 	"io/ioutil"
 	"log"
 	"net"
@@ -32,8 +33,9 @@ type Request struct {
 }
 
 func check(err error) {
+	red := color.New(color.FgRed).SprintFunc()
 	if err != nil {
-		log.Fatal("[ERROR]\t%v\n", err)
+		log.Fatal("[ERROR]\t%v\n", red(err))
 	}
 }
 
@@ -135,7 +137,8 @@ func responseGetMethod(conn net.Conn, request Request) {
 
 	path := HTML_DIR + request.Html
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		log.Printf("[WARN]\t%v\n", err)
+		yellow := color.New(color.FgYellow).SprintFunc()
+		log.Printf("[WARN]\t%v\n", yellow(err))
 		//TODO ページが存在しない場合は404エラーを返却するようにする
 
 	} else {
