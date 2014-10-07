@@ -8,6 +8,7 @@
 
 package main
 
+//TODO https://github.com/op/go-logging を利用する
 import (
 	"io/ioutil"
 	"log"
