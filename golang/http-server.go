@@ -35,7 +35,7 @@ type Request struct {
 	Html   string
 }
 
-var green = color.New(color.FgGreen).SprintFunc()
+var green = color.New(color.FgGreen, color.Bold).Add(color.Underline).SprintFunc()
 var yellow = color.New(color.FgYellow).SprintFunc()
 var red = color.New(color.FgRed).SprintFunc()
 
