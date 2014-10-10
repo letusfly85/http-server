@@ -12,7 +12,6 @@ package main
 //TODO https://github.com/op/go-logging を利用する
 import (
 	"fmt"
-	"github.com/fatih/color"
 	"io"
 	"io/ioutil"
 	"log"
@@ -20,6 +19,8 @@ import (
 	"os"
 	"regexp"
 	"strings"
+
+	"github.com/fatih/color"
 )
 
 const (
@@ -106,6 +107,7 @@ func handleRequest(conn net.Conn) {
 	case "POST":
 		//TODO: generate response body
 		log.Printf("[INFO][POST]\t\t:%v\n", yellow("go to post action."))
+		println(contents)
 		responseGetMethod(conn, request)
 
 	case "PUT":
