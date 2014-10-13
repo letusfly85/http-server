@@ -34,10 +34,6 @@ const (
 type Request struct {
 	Method string
 	Html   string
-}
-
-type PostForm struct {
-	Action string
 	Params map[string]string
 }
 
@@ -77,10 +73,10 @@ func main() {
 }
 
 /**
- * * クライアントからリクエスト要求を受け取り、レスポンスを返却する
- * ** リクエスト処理の読込
- * ** リクエスト処理の解析
- * ** レスポンス処理の実行
+ * クライアントからリクエスト要求を受け取り、レスポンスを返却する
+ *  リクエスト処理の読込
+ *  リクエスト処理の解析
+ *  レスポンス処理の実行
  *
  *
  *
@@ -91,21 +87,15 @@ func handleRequest(conn net.Conn) {
 	reqLen, err := conn.Read(buf)
 	check(err)
 
+	// 解析処理
 	contents := string(buf[:reqLen])
 	header := strings.Split(contents, "\n")
 	request := parseRequest(header[0])
+	request = parseForm(header[len(header)-1], request)
 
-	msg := fmt.Sprintf("[INFO]\t\tmethod:page  %v:%v", request.Method, request.Html)
+	msg := fmt.Sprintf("[INFO]\t\tmethod: %v\t action: %v",
+		request.Method, request.Html)
 	printOut(msg, green, nil)
-
-	//TODO parse json object
-	/*
-		for i, _ := range header[1:] {
-			log.Printf("[INFO]\t\treply message:%v\n", header[i+1])
-		}
-	*/
-	//TODO
-	postForm := PostForm{Action: "a", Params: map[string]string{"a": "b"}}
 
 	switch request.Method {
 	case "GET":
@@ -114,8 +104,7 @@ func handleRequest(conn net.Conn) {
 	case "POST":
 		//TODO: generate response body
 		log.Printf("[INFO]\t\t:%v\n", yellow("go to post action."))
-		println(contents)
-		responsePostMethod(conn, request, postForm)
+		responsePostMethod(conn, request)
 
 	case "PUT":
 		//TODO: generate response body
@@ -141,14 +130,36 @@ func handleRequest(conn net.Conn) {
  *
  */
 func parseRequest(str string) Request {
-	reg, _ := regexp.Compile("(?m)([A-Z]+)")
-
-	method := reg.FindString(str)
+	reg4method, _ := regexp.Compile("(?m)([A-Z]+)")
+	method := reg4method.FindString(str)
 	html := strings.Replace(str, method+" ", "", 1)
 	html = strings.Replace(html, " HTTP/1.1", "", 1)
 	html = strings.TrimSpace(html)
 
 	return Request{Method: method, Html: html}
+}
+
+/**
+ * パラメータをkey, valueの形に分解して、mapに格納する
+ * mapはRequestのParamsに格納する
+ *
+ */
+func parseForm(str string, req Request) Request {
+	params := make(map[string]string)
+
+	conditions := strings.Split(str, "&")
+	for _, condition := range conditions {
+		if condition == "" {
+			continue
+		}
+		reg4param := regexp.MustCompile("(.*)=(.*)")
+		group := reg4param.FindSubmatch([]byte(condition))
+		key, val := string(group[1]), string(group[2])
+		params[key] = val
+	}
+	req.Params = params
+
+	return req
 }
 
 /**
@@ -183,7 +194,7 @@ func responseGetMethod(conn net.Conn, request Request) {
  * TODO: multiForm対応させる。
  *
  */
-func responsePostMethod(conn net.Conn, request Request, postForm PostForm) {
+func responsePostMethod(conn net.Conn, request Request) {
 	//TODO: 書き換え
 	path := HTML_DIR + request.Html
 	if _, err := os.Stat(path); os.IsNotExist(err) {
