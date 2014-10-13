@@ -58,29 +58,6 @@ func check(err error) {
 	}
 }
 
-/**
- * Request構造体を受け取り、htmlの絶対パスを設定する
- *  ページ指定がない場合は、index.htmlをデフォルトページとして返却する
- *
- * TODO:
- *  設定ファイルを用意し、DocumentRootを設定出来るように改修する
- *
- */
-func (request *Request) setRequestPath() {
-	if request.Html == "/" {
-		request.Html = "/index.html"
-	}
-
-	path := HTML_DIR + request.Html
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		msg := fmt.Sprintf("[WARN]\t\t%v\n", err)
-		printOut(msg, yellow, nil)
-		path = HTML_DIR + "/404.html"
-	}
-
-	request.Path = path
-}
-
 func main() {
 	l, err := net.Listen(CONN_TYPE, CONN_HOST+":"+CONN_PORT)
 	check(err)
@@ -107,21 +84,17 @@ func main() {
  */
 func handleRequest(conn net.Conn) {
 	buf := make([]byte, 4096)
-
 	reqLen, err := conn.Read(buf)
 	check(err)
 
 	// 解析処理
 	contents := string(buf[:reqLen])
-	header := strings.Split(contents, "\n")
-	request := parseRequest(header[0])
-	request = parseForm(header[len(header)-1], request)
+	request := parseRequest(contents)
 
 	msg := fmt.Sprintf("[INFO]\t\tmethod: %v\t action: %v",
 		request.Method, request.Html)
 	printOut(msg, green, nil)
 
-	request.setRequestPath()
 	switch request.Method {
 	case "GET":
 		responseGetMethod(conn, request)
@@ -153,14 +126,48 @@ func handleRequest(conn net.Conn) {
  *
  *
  */
-func parseRequest(str string) Request {
+func parseRequest(contents string) Request {
+	target := strings.Split(contents, "\n")
+
+	header := target[0]
 	reg4method, _ := regexp.Compile("(?m)([A-Z]+)")
-	method := reg4method.FindString(str)
-	html := strings.Replace(str, method+" ", "", 1)
+	method := reg4method.FindString(header)
+	html := strings.Replace(header, method+" ", "", 1)
 	html = strings.Replace(html, " HTTP/1.1", "", 1)
 	html = strings.TrimSpace(html)
+	request := Request{Method: method, Html: html}
 
-	return Request{Method: method, Html: html}
+	request.setRequestPath()
+
+	params := target[len(target)-1]
+	if params != "" {
+		request.setFormParams(params)
+	}
+
+	return request
+}
+
+/**
+ * Request構造体を受け取り、htmlの絶対パスを設定する
+ *  ページ指定がない場合は、index.htmlをデフォルトページとして返却する
+ *
+ * TODO:
+ *  設定ファイルを用意し、DocumentRootを設定出来るように改修する
+ *
+ */
+func (request *Request) setRequestPath() {
+	if request.Html == "/" {
+		request.Html = "/index.html"
+	}
+
+	path := HTML_DIR + request.Html
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		msg := fmt.Sprintf("[WARN]\t\t%v\n", err)
+		printOut(msg, yellow, nil)
+		path = HTML_DIR + "/404.html"
+	}
+
+	request.Path = path
 }
 
 /**
@@ -172,7 +179,7 @@ func parseRequest(str string) Request {
  *  httpのリクエスト処理の使用上、paramterが最終行以外でも定義可能か確認
  *
  */
-func parseForm(str string, req Request) Request {
+func (request *Request) setFormParams(str string) {
 	params := make(map[string]string)
 
 	conditions := strings.Split(str, "&")
@@ -185,9 +192,7 @@ func parseForm(str string, req Request) Request {
 		key, val := string(group[1]), string(group[2])
 		params[key] = val
 	}
-	req.Params = params
-
-	return req
+	request.Params = params
 }
 
 /**
