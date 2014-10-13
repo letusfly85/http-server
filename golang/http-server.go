@@ -34,6 +34,7 @@ const (
 type Request struct {
 	Method string
 	Html   string
+	Path   string
 	Params map[string]string
 }
 
@@ -52,9 +53,32 @@ func printOut(msg string, f func(a ...interface{}) string, err error) {
 
 func check(err error) {
 	if err != nil {
-		msg := fmt.Sprintf("[ERROR]\t%v", err)
+		msg := fmt.Sprintf("[ERROR]\t\t%v", err)
 		printOut(msg, red, err)
 	}
+}
+
+/**
+ * Request構造体を受け取り、htmlの絶対パスを設定する
+ *  ページ指定がない場合は、index.htmlをデフォルトページとして返却する
+ *
+ * TODO:
+ *  設定ファイルを用意し、DocumentRootを設定出来るように改修する
+ *
+ */
+func (request *Request) setRequestPath() {
+	if request.Html == "/" {
+		request.Html = "/index.html"
+	}
+
+	path := HTML_DIR + request.Html
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		msg := fmt.Sprintf("[WARN]\t\t%v\n", err)
+		printOut(msg, yellow, nil)
+		path = HTML_DIR + "/404.html"
+	}
+
+	request.Path = path
 }
 
 func main() {
@@ -97,6 +121,7 @@ func handleRequest(conn net.Conn) {
 		request.Method, request.Html)
 	printOut(msg, green, nil)
 
+	request.setRequestPath()
 	switch request.Method {
 	case "GET":
 		responseGetMethod(conn, request)
@@ -123,9 +148,8 @@ func handleRequest(conn net.Conn) {
 }
 
 /**
- * * クライアントからの要求を、以下のフォーマットに分解する
- * ** Request {Method:string, Html:string}
- * ** json object: Request以外のjson形式で定義されたデータ構造
+ *  クライアントからの要求を、以下のフォーマットに分解する
+ *  Request {Method:string, Html:string}
  *
  *
  */
@@ -140,8 +164,12 @@ func parseRequest(str string) Request {
 }
 
 /**
+ * リクエスト処理の文字列の最終行をターゲットとしてparameter特定する
  * パラメータをkey, valueの形に分解して、mapに格納する
  * mapはRequestのParamsに格納する
+ *
+ * TODO:
+ *  httpのリクエスト処理の使用上、paramterが最終行以外でも定義可能か確認
  *
  */
 func parseForm(str string, req Request) Request {
@@ -163,47 +191,31 @@ func parseForm(str string, req Request) Request {
 }
 
 /**
- * * GET要求への処理
- * ** ページ指定がない場合は、index.htmlをデフォルトページとして返却する
+ *  GET要求への処理
  *
- * TODO: page要求とfavicon要求が来た際に、両方を返却してブラウザ編集が継続できるように改修
+ * TODO:
+ *   page要求とfavicon要求が来た際に、
+ *   両方を返却してブラウザ編集が継続できるように改修
  *
  */
 func responseGetMethod(conn net.Conn, request Request) {
-	if request.Html == "/" {
-		request.Html = "/index.html"
-	}
-
-	path := HTML_DIR + request.Html
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		msg := fmt.Sprintf("[WARN]\t\t%v\n", err)
-		printOut(msg, yellow, nil)
-		// ページが存在しない場合は404エラーを返却するようにする
-		path = HTML_DIR + "/404.html"
-	}
-
-	htmlData, err := ioutil.ReadFile(path)
+	htmlData, err := ioutil.ReadFile(request.Path)
 	check(err)
+
 	conn.Write(htmlData)
 }
 
 /**
  * * POST要求への処理
  *
- * TODO: 存在しないaction指定の場合は、RoutingErrorを返却させる。
- * TODO: multiForm対応させる。
+ * TODO: 存在しないaction指定の場合は、RoutingErrorを返却させる
+ * TODO: multiForm対応させる
  *
  */
 func responsePostMethod(conn net.Conn, request Request) {
 	//TODO: 書き換え
-	path := HTML_DIR + request.Html
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		msg := fmt.Sprintf("[WARN]\t\t%v\n", err)
-		printOut(msg, yellow, nil)
-		path = HTML_DIR + "/404.html"
-	}
-
-	htmlData, err := ioutil.ReadFile(path)
+	htmlData, err := ioutil.ReadFile(request.Path)
 	check(err)
+
 	conn.Write(htmlData)
 }
