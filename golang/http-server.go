@@ -36,6 +36,11 @@ type Request struct {
 	Html   string
 }
 
+type PostForm struct {
+	Action string
+	Params map[string]string
+}
+
 var green = color.New(color.FgGreen, color.Bold).Add(color.Underline).SprintFunc()
 var yellow = color.New(color.FgYellow).SprintFunc()
 var red = color.New(color.FgRed).SprintFunc()
@@ -81,7 +86,7 @@ func main() {
  *
  */
 func handleRequest(conn net.Conn) {
-	buf := make([]byte, 1024)
+	buf := make([]byte, 4096)
 
 	reqLen, err := conn.Read(buf)
 	check(err)
@@ -99,6 +104,8 @@ func handleRequest(conn net.Conn) {
 			log.Printf("[INFO]\t\treply message:%v\n", header[i+1])
 		}
 	*/
+	//TODO
+	postForm := PostForm{Action: "a", Params: map[string]string{"a": "b"}}
 
 	switch request.Method {
 	case "GET":
@@ -106,9 +113,9 @@ func handleRequest(conn net.Conn) {
 
 	case "POST":
 		//TODO: generate response body
-		log.Printf("[INFO][POST]\t\t:%v\n", yellow("go to post action."))
+		log.Printf("[INFO]\t\t:%v\n", yellow("go to post action."))
 		println(contents)
-		responseGetMethod(conn, request)
+		responsePostMethod(conn, request, postForm)
 
 	case "PUT":
 		//TODO: generate response body
@@ -161,6 +168,27 @@ func responseGetMethod(conn net.Conn, request Request) {
 		msg := fmt.Sprintf("[WARN]\t\t%v\n", err)
 		printOut(msg, yellow, nil)
 		// ページが存在しない場合は404エラーを返却するようにする
+		path = HTML_DIR + "/404.html"
+	}
+
+	htmlData, err := ioutil.ReadFile(path)
+	check(err)
+	conn.Write(htmlData)
+}
+
+/**
+ * * POST要求への処理
+ *
+ * TODO: 存在しないaction指定の場合は、RoutingErrorを返却させる。
+ * TODO: multiForm対応させる。
+ *
+ */
+func responsePostMethod(conn net.Conn, request Request, postForm PostForm) {
+	//TODO: 書き換え
+	path := HTML_DIR + request.Html
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		msg := fmt.Sprintf("[WARN]\t\t%v\n", err)
+		printOut(msg, yellow, nil)
 		path = HTML_DIR + "/404.html"
 	}
 
