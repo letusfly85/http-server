@@ -5,6 +5,7 @@
  *
  * refs: http://www.freefavicon.com/freefavicons/objects/iconinfo/yin-yang-152-1271.html
  *
+ * refs: http://tools.ietf.org/html/rfc2616#section-9.6
  */
 
 package main
@@ -106,7 +107,7 @@ func handleRequest(conn net.Conn) {
 
 	case "PUT":
 		//TODO: generate response body
-		responseGetMethod(conn, request)
+		responsePutMethod(conn, request)
 
 	case "DELETE":
 		//TODO: generate response body
@@ -160,7 +161,9 @@ func (request *Request) setRequestMethod(header string) {
 
 /**
  * Request構造体を受け取り、htmlの絶対パスを設定する
- *  ページ指定がない場合は、index.htmlをデフォルトページとして返却する
+ * リソースの指定がない場合は、indexをデフォルトページとして返却する
+ * 指定されたリソースが存在しない場合、404エラーを返却する
+ * PUT処理の場合はリソースを新規作成するために、404は返却しない
  *
  * TODO:
  *  設定ファイルを用意し、DocumentRootを設定出来るように改修する
@@ -172,7 +175,7 @@ func (request *Request) setRequestPath() {
 	}
 
 	path := HTML_DIR + request.Html
-	if _, err := os.Stat(path); os.IsNotExist(err) {
+	if _, err := os.Stat(path); os.IsNotExist(err) && request.Method != "PUT" {
 		msg := fmt.Sprintf("[WARN]\t\t%v\n", err)
 		printOut(msg, yellow, nil)
 		path = HTML_DIR + "/404.html"
@@ -229,9 +232,29 @@ func responseGetMethod(conn net.Conn, request Request) {
  *
  */
 func responsePostMethod(conn net.Conn, request Request) {
-	//TODO: 書き換え
 	htmlData, err := ioutil.ReadFile(request.Path)
 	check(err)
 
 	conn.Write(htmlData)
+}
+
+/**
+ * PUT要求への処理
+ *
+ * リソースが存在しない場合は新規で作成し、
+ * リソースが存在する場合は更新する
+ *
+ */
+func responsePutMethod(conn net.Conn, request Request) {
+	if _, err := os.Stat(request.Path); err == nil {
+		//TODO 更新処理の実装
+		msg := fmt.Sprintf("[INFO]\t\t%v exists already!", request.Path)
+		printOut(msg, green, nil)
+	}
+
+	content := []byte("")
+	ioutil.WriteFile(request.Path, content, 0644)
+
+	returnStatus := "204"
+	conn.Write([]byte(returnStatus))
 }
