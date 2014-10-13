@@ -121,22 +121,17 @@ func handleRequest(conn net.Conn) {
 }
 
 /**
- *  クライアントからの要求を、以下のフォーマットに分解する
- *  Request {Method:string, Html:string}
+ *  クライアントからの要求を、解析してRequest構造体を返却する
  *
  *
  */
 func parseRequest(contents string) Request {
+	request := Request{}
+
 	target := strings.Split(contents, "\n")
 
 	header := target[0]
-	reg4method, _ := regexp.Compile("(?m)([A-Z]+)")
-	method := reg4method.FindString(header)
-	html := strings.Replace(header, method+" ", "", 1)
-	html = strings.Replace(html, " HTTP/1.1", "", 1)
-	html = strings.TrimSpace(html)
-	request := Request{Method: method, Html: html}
-
+	request.setRequestMethod(header)
 	request.setRequestPath()
 
 	params := target[len(target)-1]
@@ -145,6 +140,22 @@ func parseRequest(contents string) Request {
 	}
 
 	return request
+}
+
+/**
+ * TODO:
+ *  explain
+ *
+ */
+func (request *Request) setRequestMethod(header string) {
+	reg4method, _ := regexp.Compile("(?m)([A-Z]+)")
+	method := reg4method.FindString(header)
+	html := strings.Replace(header, method+" ", "", 1)
+	html = strings.Replace(html, " HTTP/1.1", "", 1)
+	html = strings.TrimSpace(html)
+
+	request.Html = html
+	request.Method = method
 }
 
 /**
