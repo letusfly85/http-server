@@ -111,7 +111,7 @@ func handleRequest(conn net.Conn) {
 
 	case "DELETE":
 		//TODO: generate response body
-		responseGetMethod(conn, request)
+		responseDeleteMethod(conn, request)
 
 	default:
 		//TODO: generate response body
@@ -257,4 +257,11 @@ func responsePutMethod(conn net.Conn, request Request) {
 
 	returnStatus := "204"
 	conn.Write([]byte(returnStatus))
+}
+
+func responseDeleteMethod(conn net.Conn, request Request) {
+	htmlData, err := ioutil.ReadFile(request.Path)
+	check(err)
+
+	conn.Write(htmlData)
 }
