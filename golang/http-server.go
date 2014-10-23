@@ -10,7 +10,6 @@
 
 package main
 
-//TODO https://github.com/op/go-logging を利用する
 import (
 	"fmt"
 	"io"
@@ -259,9 +258,16 @@ func responsePutMethod(conn net.Conn, request Request) {
 	conn.Write([]byte(returnStatus))
 }
 
+/**
+ * DELETE要求への処理
+ *
+ * リソースが存在する場合は削除する
+ *
+ */
 func responseDeleteMethod(conn net.Conn, request Request) {
-	htmlData, err := ioutil.ReadFile(request.Path)
+	err := os.Remove(request.Path)
 	check(err)
 
-	conn.Write(htmlData)
+	returnStatus := "204"
+	conn.Write([]byte(returnStatus))
 }
