@@ -36,6 +36,7 @@ type Request struct {
 	Html   string
 	Path   string
 	Params map[string]string
+	Body   string
 }
 
 var green = color.New(color.FgGreen, color.Bold).Add(color.Underline).SprintFunc()
@@ -109,7 +110,6 @@ func handleRequest(conn net.Conn) {
 		responsePutMethod(conn, request)
 
 	case "DELETE":
-		//TODO: generate response body
 		responseDeleteMethod(conn, request)
 
 	default:
@@ -241,18 +241,12 @@ func responsePostMethod(conn net.Conn, request Request) {
  * PUT要求への処理
  *
  * リソースが存在しない場合は新規で作成し、
- * リソースが存在する場合は更新する
+ * リソースが存在する場合は上書き実施
  *
  */
 func responsePutMethod(conn net.Conn, request Request) {
-	if _, err := os.Stat(request.Path); err == nil {
-		//TODO 更新処理の実装
-		msg := fmt.Sprintf("[INFO]\t\t%v exists already!", request.Path)
-		printOut(msg, green, nil)
-	}
-
-	content := []byte("")
-	ioutil.WriteFile(request.Path, content, 0644)
+	//TODO Bodyを受け取る口を用意（ファイルアップロードとする）
+	ioutil.WriteFile(request.Path, []byte(request.Body), 0644)
 
 	returnStatus := "204"
 	conn.Write([]byte(returnStatus))
