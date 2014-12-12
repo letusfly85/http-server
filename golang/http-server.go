@@ -91,6 +91,7 @@ func handleRequest(conn net.Conn) {
 	// 解析処理
 	contents := string(buf[:reqLen])
 	request := parseRequest(contents)
+	println(contents)
 
 	msg := fmt.Sprintf("[INFO]\t\tmethod: %v\t action: %v",
 		request.Method, request.Html)
@@ -102,7 +103,8 @@ func handleRequest(conn net.Conn) {
 
 	case "POST":
 		//TODO: generate response body
-		log.Printf("[INFO]\t\t:%v\n", yellow("go to post action."))
+		msg := "[INFO]\t\t:go to post action."
+		printOut(msg, green, nil)
 		responsePostMethod(conn, request)
 
 	case "PUT":
