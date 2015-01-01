@@ -1,2 +1,4 @@
-*swp
+golang/pkg
+golang/src
 gin-bin
+
