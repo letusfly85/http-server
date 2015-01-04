@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"net"
 	"strings"
 	"testing"
@@ -34,7 +33,6 @@ func TestResponseGetMethod(t *testing.T) {
 	actual := <-ch
 	//TODO 改行が含まれてしまっているので対処が必要
 	actual = strings.Trim(actual, "\n")
-	log.Print(actual)
 
 	expected := "hello, test"
 	if actual != expected {
