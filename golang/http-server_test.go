@@ -1,7 +1,9 @@
 package main
 
 import (
+	"io"
 	"net"
+	"os"
 	"strings"
 	"testing"
 )
@@ -42,10 +44,38 @@ func TestResponseGetMethod(t *testing.T) {
 
 //TODO
 func TestResponseDeleteMethod(t *testing.T) {
-	actual := 1
-	expected := 1
+	//delete 対象のファイル準備を実施
+	//NOTE: setupメソッドのようなものを提供するライブラリがあればそちらに切り替え
+	src, _ := os.Open("test/delete_test_template.html")
+	dst, _ := os.Create("/var/www/myhtml/test/delete_test.html")
+	_, err := io.Copy(src, dst)
+	check(err)
+
+	conn, err := net.Dial(CONN_TYPE, CONN_HOST+":"+CONN_PORT)
+	check(err)
+	defer conn.Close()
+
+	ch := make(chan string)
+	go func(c chan string) {
+		// var/www/myhtml/ の直下にファイルを格納している。
+		// シンボリック対応している。
+		str := "DELETE /test/delete_test.html HTTP/1.1\n\n\n"
+		conn.Write([]byte(str))
+
+		buf := make([]byte, 1024)
+		rlen, err := conn.Read(buf)
+		if err != nil {
+			c <- "something happen!"
+		}
+		c <- string(buf[:rlen])
+	}(ch)
+	actual := <-ch
+	//TODO 改行が含まれてしまっているので対処が必要
+	actual = strings.Trim(actual, "\n")
+
+	expected := "204"
 	if actual != expected {
-		t.Errorf("got %v\nwant %v", actual, expected)
+		t.Errorf("got %vwant %v", actual, expected)
 	}
 }
 
