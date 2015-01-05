@@ -176,7 +176,20 @@ func (request *Request) setRequestPath() {
 	}
 
 	path := HTML_DIR + request.Html
-	if _, err := os.Stat(path); os.IsNotExist(err) && request.Method != "PUT" {
+	info, err := os.Lstat(path)
+
+	//NOTE: FileInfo.Mode()を利用することで、シンボリックリンクか判別可能
+	log.Println(info.Mode())
+
+	//TODO: シンボリックリンクの場合は、Readlink関数を利用して実パスを取得
+	_link, err := os.Readlink(path)
+	if err == nil {
+		log.Println(_link)
+	} else {
+		log.Println(err)
+	}
+
+	if os.IsNotExist(err) && request.Method != "PUT" {
 		msg := fmt.Sprintf("[WARN]\t\t%v\n", err)
 		printOut(msg, yellow, nil)
 		path = HTML_DIR + "/404.html"
@@ -222,6 +235,13 @@ func responseGetMethod(conn net.Conn, request Request) {
 	htmlData, err := ioutil.ReadFile(request.Path)
 	check(err)
 
+	log.Printf("aaaaaaa")
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Printf(request.Path)
+	log.Printf(string(htmlData))
+	log.Printf("bbbbbb")
 	conn.Write(htmlData)
 }
 

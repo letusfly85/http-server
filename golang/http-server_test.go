@@ -20,7 +20,7 @@ func TestResponseGetMethod(t *testing.T) {
 	go func(c chan string) {
 		//TODO /var/www/myhtml/ の直下にファイルを格納している。
 		//     シンボリック対応ができるように改修する
-		str := "GET /test/get_test.html HTTP/1.1\n\n\n"
+		str := "GET /test/get_test2.html HTTP/1.1\n\n\n"
 		conn.Write([]byte(str))
 
 		buf := make([]byte, 1024)
