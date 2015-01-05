@@ -18,8 +18,8 @@ func TestResponseGetMethod(t *testing.T) {
 
 	ch := make(chan string)
 	go func(c chan string) {
-		//TODO /var/www/myhtml/ の直下にファイルを格納している。
-		//     シンボリック対応ができるように改修する
+		// var/www/myhtml/ の直下にファイルを格納している。
+		// シンボリック対応している。
 		str := "GET /test/get_test2.html HTTP/1.1\n\n\n"
 		conn.Write([]byte(str))
 

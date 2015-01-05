@@ -178,15 +178,11 @@ func (request *Request) setRequestPath() {
 	path := HTML_DIR + request.Html
 	info, err := os.Lstat(path)
 
-	//NOTE: FileInfo.Mode()を利用することで、シンボリックリンクか判別可能
-	log.Println(info.Mode())
-
-	//TODO: シンボリックリンクの場合は、Readlink関数を利用して実パスを取得
-	_link, err := os.Readlink(path)
-	if err == nil {
-		log.Println(_link)
-	} else {
-		log.Println(err)
+	//シンボリックリンクの場合は、Readlink関数を利用して実パスを取得
+	//refs: https://groups.google.com/forum/#!topic/golang-nuts/jpsgja5B_Kk
+	//refs: http://golang.org/pkg/os/#ModeSymlink
+	if info.Mode()&os.ModeSymlink == os.ModeSymlink {
+		path, err = os.Readlink(path)
 	}
 
 	if os.IsNotExist(err) && request.Method != "PUT" {
