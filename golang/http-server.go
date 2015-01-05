@@ -235,13 +235,6 @@ func responseGetMethod(conn net.Conn, request Request) {
 	htmlData, err := ioutil.ReadFile(request.Path)
 	check(err)
 
-	log.Printf("aaaaaaa")
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Printf(request.Path)
-	log.Printf(string(htmlData))
-	log.Printf("bbbbbb")
 	conn.Write(htmlData)
 }
 
