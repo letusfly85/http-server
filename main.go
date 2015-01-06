@@ -14,7 +14,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"net"
 	"os"
 	"regexp"
@@ -27,7 +26,7 @@ import (
 type Config struct {
 	Server struct {
 		HostName       string
-		PortNumber     int
+		PortNumber     string
 		ConnectionType string
 		DocumentRoot   string
 	}
@@ -43,23 +42,6 @@ type Request struct {
 
 var green = color.New(color.FgGreen, color.Bold).Add(color.Underline).SprintFunc()
 var yellow = color.New(color.FgYellow).SprintFunc()
-var red = color.New(color.FgRed).SprintFunc()
-
-func printOut(msg string, f func(a ...interface{}) string, err error) {
-	if err != nil {
-		log.Panicln(err.Error())
-
-	} else {
-		log.Printf(f(msg))
-	}
-}
-
-func check(err error) {
-	if err != nil {
-		msg := fmt.Sprintf("[ERROR]\t\t%v", err)
-		printOut(msg, red, err)
-	}
-}
 
 var cfg Config
 
@@ -70,7 +52,7 @@ func main() {
 	l, err := net.Listen(cfg.Server.ConnectionType, cfg.Server.HostName+":"+cfg.Server.PortNumber)
 	check(err)
 	defer l.Close()
-	msg := fmt.Sprintf("[INFO]\t\tlistening...\t%v:%v", CONN_HOST, CONN_PORT)
+	msg := fmt.Sprintf("[INFO]\t\tlistening...\t%v:%v", cfg.Server.HostName, cfg.Server.PortNumber)
 	printOut(msg, green, nil)
 
 	for {
@@ -182,7 +164,7 @@ func (request *Request) setRequestPath() {
 		request.Html = "/index.html"
 	}
 
-	path := HTML_DIR + request.Html
+	path := cfg.Server.DocumentRoot + request.Html
 	info, err := os.Lstat(path)
 
 	//シンボリックリンクの場合は、Readlink関数を利用して実パスを取得
@@ -195,7 +177,7 @@ func (request *Request) setRequestPath() {
 	if os.IsNotExist(err) && request.Method != "PUT" {
 		msg := fmt.Sprintf("[WARN]\t\t%v\n", err)
 		printOut(msg, yellow, nil)
-		path = HTML_DIR + "/404.html"
+		path = cfg.Server.DocumentRoot + "/404.html"
 	}
 
 	request.Path = path
