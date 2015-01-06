@@ -1,0 +1,13 @@
+{
+	"ImportPath": "github.com/letusfly85/my-golang-httpserver",
+	"GoVersion": "go1.2.2",
+	"Packages": [
+		"github.com/letusfly85/my-golang-httpserver"
+	],
+	"Deps": [
+		{
+			"ImportPath": "github.com/fatih/color",
+			"Rev": "3161cccfa22c6243e02aa984cf2886d022024cec"
+		}
+	]
+}
