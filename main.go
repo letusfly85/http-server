@@ -20,7 +20,6 @@ import (
 	"strings"
 
 	"code.google.com/p/gcfg"
-	"github.com/fatih/color"
 )
 
 type Config struct {
@@ -40,19 +39,19 @@ type Request struct {
 	Body   string
 }
 
-var green = color.New(color.FgGreen, color.Bold).Add(color.Underline).SprintFunc()
-var yellow = color.New(color.FgYellow).SprintFunc()
-
 var cfg Config
 
 func main() {
 	err := gcfg.ReadFileInto(&cfg, "conf.gcfg")
 	check(err)
 
-	l, err := net.Listen(cfg.Server.ConnectionType, cfg.Server.HostName+":"+cfg.Server.PortNumber)
+	l, err := net.Listen(cfg.Server.ConnectionType,
+		cfg.Server.HostName+":"+cfg.Server.PortNumber)
 	check(err)
 	defer l.Close()
-	msg := fmt.Sprintf("[INFO]\t\tlistening...\t%v:%v", cfg.Server.HostName, cfg.Server.PortNumber)
+
+	msg := fmt.Sprintf("[INFO]\t\tlistening...\t%v:%v",
+		cfg.Server.HostName, cfg.Server.PortNumber)
 	printOut(msg, green, nil)
 
 	for {
@@ -166,6 +165,7 @@ func (request *Request) setRequestPath() {
 
 	path := cfg.Server.DocumentRoot + request.Html
 	info, err := os.Lstat(path)
+	check(err)
 
 	//シンボリックリンクの場合は、Readlink関数を利用して実パスを取得
 	//refs: https://groups.google.com/forum/#!topic/golang-nuts/jpsgja5B_Kk

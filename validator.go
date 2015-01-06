@@ -1,12 +1,6 @@
 package main
 
-import (
-	"fmt"
-
-	"github.com/fatih/color"
-)
-
-var red = color.New(color.FgRed).SprintFunc()
+import "fmt"
 
 func check(err error) {
 	if err != nil {
