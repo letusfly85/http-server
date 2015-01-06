@@ -20,16 +20,18 @@ import (
 	"regexp"
 	"strings"
 
+	"code.google.com/p/gcfg"
 	"github.com/fatih/color"
 )
 
-const (
-	CONN_HOST = "localhost"
-	CONN_PORT = "3333"
-	CONN_TYPE = "tcp"
-
-	HTML_DIR = "/var/www/myhtml"
-)
+type Config struct {
+	Server struct {
+		HostName       string
+		PortNumber     int
+		ConnectionType string
+		DocumentRoot   string
+	}
+}
 
 type Request struct {
 	Method string
@@ -45,7 +47,7 @@ var red = color.New(color.FgRed).SprintFunc()
 
 func printOut(msg string, f func(a ...interface{}) string, err error) {
 	if err != nil {
-		log.Fatal(f(msg))
+		log.Panicln(err.Error())
 
 	} else {
 		log.Printf(f(msg))
@@ -59,8 +61,13 @@ func check(err error) {
 	}
 }
 
+var cfg Config
+
 func main() {
-	l, err := net.Listen(CONN_TYPE, CONN_HOST+":"+CONN_PORT)
+	err := gcfg.ReadFileInto(&cfg, "conf.gcfg")
+	check(err)
+
+	l, err := net.Listen(cfg.Server.ConnectionType, cfg.Server.HostName+":"+cfg.Server.PortNumber)
 	check(err)
 	defer l.Close()
 	msg := fmt.Sprintf("[INFO]\t\tlistening...\t%v:%v", CONN_HOST, CONN_PORT)

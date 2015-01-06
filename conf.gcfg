@@ -1,0 +1,5 @@
+[server]
+hostName=localhost
+portNumber=3333
+connectionType=tcp
+documentRoot=/var/www/myhtml
