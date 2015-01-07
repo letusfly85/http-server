@@ -24,7 +24,7 @@ import (
 var cfg Config
 
 func main() {
-	var confName = flag.String("conf", "conf.gcfg", "config file")
+	var confName = flag.String("f", "conf.gcfg", "config file")
 	flag.Parse()
 
 	cfg, err := GetConfig(*confName)
