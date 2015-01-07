@@ -16,18 +16,14 @@ type Config struct {
 	}
 }
 
-func GetConfig() Config {
-	var cfg Config
-	//TODO flgを利用して、設定ファイルを引数指定で変更できるように改修
-	confName := "conf.gcfg"
-
+func GetConfig(confName string) (cfg Config, err error) {
 	//conf.gcfgが存在しない場合は異常終了
 	if _, err := os.Stat(confName); os.IsNotExist(err) {
-		log.Panicln(err.Error())
+		log.Fatal(err.Error())
 	}
 
-	err := gcfg.ReadFileInto(&cfg, "conf.gcfg")
+	err = gcfg.ReadFileInto(&cfg, confName)
 	check(err)
 
-	return cfg
+	return cfg, err
 }

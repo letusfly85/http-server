@@ -11,6 +11,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -23,7 +24,11 @@ import (
 var cfg Config
 
 func main() {
-	cfg := GetConfig()
+	var confName = flag.String("conf", "conf.gcfg", "config file")
+	flag.Parse()
+
+	cfg, err := GetConfig(*confName)
+	check(err)
 
 	l, err := net.Listen(cfg.Server.ConnectionType,
 		cfg.Server.HostName+":"+cfg.Server.PortNumber)
