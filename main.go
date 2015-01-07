@@ -18,18 +18,7 @@ import (
 	"os"
 	"regexp"
 	"strings"
-
-	"code.google.com/p/gcfg"
 )
-
-type Config struct {
-	Server struct {
-		HostName       string
-		PortNumber     string
-		ConnectionType string
-		DocumentRoot   string
-	}
-}
 
 type Request struct {
 	Method string
@@ -42,8 +31,7 @@ type Request struct {
 var cfg Config
 
 func main() {
-	err := gcfg.ReadFileInto(&cfg, "conf.gcfg")
-	check(err)
+	cfg := GetConfig()
 
 	l, err := net.Listen(cfg.Server.ConnectionType,
 		cfg.Server.HostName+":"+cfg.Server.PortNumber)
