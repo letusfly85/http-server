@@ -7,8 +7,21 @@ import (
 	"strings"
 )
 
-func (request *Request) parseHeader(contents string) {
-	header := strings.Split(contents, "\n")[0]
+func parseRequest(contents string) Request {
+	var request = Request{}
+
+	target := strings.Split(contents, "\n")
+	header := target[0]
+	params := target[len(target)-1]
+
+	request.parseHeader(header)
+	request.setRequestPath()
+	request.parseFormParams(params)
+
+	return request
+}
+
+func (request *Request) parseHeader(header string) {
 
 	reg4method, _ := regexp.Compile("(?m)([A-Z]+)")
 	method := reg4method.FindString(header)
@@ -20,21 +33,6 @@ func (request *Request) parseHeader(contents string) {
 
 	request.Html = html
 	request.Method = method
-}
-
-/**
- *  クライアントからの要求を、解析してRequest構造体を返却する
- *
- *
- */
-func (request *Request) parseBody(contents string) {
-	request.setRequestPath()
-
-	target := strings.Split(contents, "\n")
-	params := target[len(target)-1]
-	if params != "" {
-		request.setFormParams(params)
-	}
 }
 
 /**
@@ -81,7 +79,10 @@ func (request *Request) setRequestPath() {
  *  httpのリクエスト処理の使用上、paramterが最終行以外でも定義可能か確認
  *
  */
-func (request *Request) setFormParams(str string) {
+func (request *Request) parseFormParams(str string) {
+	if str == "" {
+		return
+	}
 	params := make(map[string]string)
 
 	conditions := strings.Split(str, "&")

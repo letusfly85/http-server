@@ -60,9 +60,7 @@ func handleRequest(conn net.Conn) {
 
 	// 解析処理
 	contents := string(buf[:reqLen])
-	var request = Request{}
-	request.parseHeader(contents)
-	request.parseBody(contents)
+	request := parseRequest(contents)
 	println(contents)
 
 	msg := fmt.Sprintf("[INFO]\t\tmethod: %v\t action: %v",
