@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 
@@ -16,10 +18,21 @@ type Config struct {
 	}
 }
 
+func (cfg *Config) ToString() string {
+	result, err := json.MarshalIndent(&cfg, "", "     ")
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	return fmt.Sprintf(string(result))
+}
+
 func GetConfig(confName string) (cfg Config, err error) {
 	//conf.gcfgが存在しない場合は異常終了
 	if _, err := os.Stat(confName); os.IsNotExist(err) {
-		log.Fatal(err.Error())
+		log.Println(err.Error())
+
+		return cfg, err
 	}
 
 	err = gcfg.ReadFileInto(&cfg, confName)

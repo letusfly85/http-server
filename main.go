@@ -35,8 +35,7 @@ func main() {
 	check(err)
 	defer l.Close()
 
-	msg := fmt.Sprintf("[INFO]\t\tlistening...\t%v:%v",
-		cfg.Server.HostName, cfg.Server.PortNumber)
+	msg := fmt.Sprintf("[INFO]\t\tlistening...\t%v", cfg.ToString())
 	printOut(msg, green, nil)
 
 	for {
