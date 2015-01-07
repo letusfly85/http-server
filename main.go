@@ -105,7 +105,7 @@ func parseRequest(contents string) Request {
 	target := strings.Split(contents, "\n")
 
 	header := target[0]
-	request.setRequestMethod(header)
+	request.parseHeader(header)
 	request.setRequestPath()
 
 	params := target[len(target)-1]
@@ -114,22 +114,6 @@ func parseRequest(contents string) Request {
 	}
 
 	return request
-}
-
-/**
- * TODO:
- *  explain
- *
- */
-func (request *Request) setRequestMethod(header string) {
-	reg4method, _ := regexp.Compile("(?m)([A-Z]+)")
-	method := reg4method.FindString(header)
-	html := strings.Replace(header, method+" ", "", 1)
-	html = strings.Replace(html, " HTTP/1.1", "", 1)
-	html = strings.TrimSpace(html)
-
-	request.Html = html
-	request.Method = method
 }
 
 /**
