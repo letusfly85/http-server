@@ -53,8 +53,9 @@ func (request *Request) setRequestPath(documentRoot string) {
 
 	path := documentRoot + request.Html
 
-	//ファイルのシンボリックリンクチェック
 	info, err := os.Lstat(path)
+
+	//ファイルの存在チェック
 	if os.IsNotExist(err) && request.Method != "PUT" {
 		msg := fmt.Sprintf("[WARN]\t\t%v\n", err)
 		printOut(msg, yellow, nil)
@@ -62,6 +63,8 @@ func (request *Request) setRequestPath(documentRoot string) {
 		request.Path = documentRoot + "/404.html"
 		return
 	}
+
+	//ファイルのシンボリックリンクチェック
 	if info.Mode()&os.ModeSymlink == os.ModeSymlink {
 		linkPath, err := os.Readlink(path)
 		check(err)
