@@ -32,10 +32,8 @@ func (request *Request) parseHeader(header string) {
 	method := reg4method.FindString(header)
 	html := strings.Replace(header, method+" ", "", 1)
 
-	//TODO regexp replaceに変更する。HTTPのversionは、HTTP/x.xとして表現されるため
 	reg4version := regexp.MustCompile("HTTP/([0-9]).([0-9])")
 	html = reg4version.ReplaceAllString(html, "")
-	//html = strings.Replace(html, " HTTP/1.1", "", 1)
 	html = strings.TrimSpace(html)
 
 	request.Html = html
