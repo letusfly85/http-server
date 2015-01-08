@@ -26,6 +26,7 @@ func parseRequest(contents string, docRoot string) Request {
 }
 
 func (request *Request) parseHeader(header string) {
+	//TODO 引数チェックの実装
 
 	reg4method, _ := regexp.Compile("(?m)([A-Z]+)")
 	method := reg4method.FindString(header)
