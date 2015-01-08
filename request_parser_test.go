@@ -60,6 +60,15 @@ func TestSetRequestPath(t *testing.T) {
 		t.Errorf("got %v, want %v", actual, expected)
 	}
 
+	request.Html = "/symdummy.html"
+	request.setRequestPath("test/html")
+
+	actual = request.Path
+	expected = "test/html/dummy.html"
+	if expected != actual {
+		t.Errorf("got %v, want %v", actual, expected)
+	}
+
 	request.Html = "/notExists.html"
 	request.setRequestPath("test/html")
 

@@ -7,10 +7,7 @@ import (
 	"strings"
 )
 
-var documentRoot string
-
-func parseRequest(contents string, docRoot string) Request {
-	documentRoot = docRoot
+func parseRequest(contents string, documentRoot string) Request {
 	var request = Request{}
 
 	target := strings.Split(contents, "\n")
@@ -45,9 +42,6 @@ func (request *Request) parseHeader(header string) {
  * 指定されたリソースが存在しない場合、404エラーを返却する
  * PUT処理の場合はリソースを新規作成するために、404は返却しない
  *
- * TODO:
- *  設定ファイルを用意し、DocumentRootを設定出来るように改修する
- *
  */
 func (request *Request) setRequestPath(documentRoot string) {
 	if request.Html == "/" || request.Html == "" {
@@ -58,7 +52,9 @@ func (request *Request) setRequestPath(documentRoot string) {
 	}
 
 	path := documentRoot + request.Html
-	_, err := os.Stat(path)
+
+	//ファイルのシンボリックリンクチェック
+	info, err := os.Lstat(path)
 	if os.IsNotExist(err) && request.Method != "PUT" {
 		msg := fmt.Sprintf("[WARN]\t\t%v\n", err)
 		printOut(msg, yellow, nil)
@@ -66,20 +62,15 @@ func (request *Request) setRequestPath(documentRoot string) {
 		request.Path = documentRoot + "/404.html"
 		return
 	}
-
-	info, err := os.Lstat(path)
-	check(err)
-
-	//シンボリックリンクの場合は、Readlink関数を利用して実パスを取得
 	if info.Mode()&os.ModeSymlink == os.ModeSymlink {
-		path, err = os.Readlink(path)
+		linkPath, err := os.Readlink(path)
 		check(err)
 
-		request.Path = documentRoot + request.Html
+		request.Path = linkPath
 		return
 
 	} else {
-		request.Path = documentRoot + request.Html
+		request.Path = path
 	}
 }
 
