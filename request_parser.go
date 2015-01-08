@@ -30,6 +30,9 @@ func (request *Request) parseHeader(header string) {
 
 	reg4version := regexp.MustCompile("HTTP/([0-9]).([0-9])")
 	html = reg4version.ReplaceAllString(html, "")
+
+	reg4params := regexp.MustCompile("([?])(.*)")
+	html = reg4params.ReplaceAllString(html, "")
 	html = strings.TrimSpace(html)
 
 	request.Html = html
@@ -84,6 +87,8 @@ func (request *Request) setRequestPath(documentRoot string) {
  *
  * TODO:
  *  httpのリクエスト処理の使用上、paramterが最終行以外でも定義可能か確認
+ *
+ *	TODO urlにパラメータ記載がある場合の処理を実装
  *
  */
 func (request *Request) parseFormParams(str string) {
