@@ -5,7 +5,6 @@ import (
 	"testing"
 )
 
-//TODO
 func TestParseHeader(t *testing.T) {
 	contents := `GET /index.html HTTP/2.1
 		Host: localhost:3333
@@ -27,6 +26,46 @@ func TestParseHeader(t *testing.T) {
 	expected := "/index.html"
 
 	if expected != actual {
-		t.Errorf("got %vwant %v", actual, expected)
+		t.Errorf("got %v, want %v", actual, expected)
+	}
+}
+
+func TestSetRequestPath(t *testing.T) {
+	var request = Request{}
+
+	request.Html = ""
+	request.setRequestPath("test/html")
+
+	actual := request.Path
+	expected := "test/html/index.html"
+	if expected != actual {
+		t.Errorf("got %v, want %v", actual, expected)
+	}
+
+	request.Html = "/"
+	request.setRequestPath("test/html")
+
+	actual = request.Path
+	expected = "test/html/index.html"
+	if expected != actual {
+		t.Errorf("got %v, want %v", actual, expected)
+	}
+
+	request.Html = "/dummy.html"
+	request.setRequestPath("test/html")
+
+	actual = request.Path
+	expected = "test/html/dummy.html"
+	if expected != actual {
+		t.Errorf("got %v, want %v", actual, expected)
+	}
+
+	request.Html = "/notExists.html"
+	request.setRequestPath("test/html")
+
+	actual = request.Path
+	expected = "test/html/404.html"
+	if expected != actual {
+		t.Errorf("got %v, want %v", actual, expected)
 	}
 }

@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"regexp"
 	"strings"
@@ -19,7 +18,7 @@ func parseRequest(contents string, docRoot string) Request {
 	params := target[len(target)-1]
 
 	request.parseHeader(header)
-	request.setRequestPath()
+	request.setRequestPath(documentRoot)
 	request.parseFormParams(params)
 
 	return request
@@ -50,30 +49,38 @@ func (request *Request) parseHeader(header string) {
  *  設定ファイルを用意し、DocumentRootを設定出来るように改修する
  *
  */
-func (request *Request) setRequestPath() {
-	if request.Html == "/" {
+func (request *Request) setRequestPath(documentRoot string) {
+	if request.Html == "/" || request.Html == "" {
 		request.Html = "/index.html"
+
+		request.Path = documentRoot + request.Html
+		return
 	}
 
 	path := documentRoot + request.Html
-	log.Println(path)
+	_, err := os.Stat(path)
+	if os.IsNotExist(err) && request.Method != "PUT" {
+		msg := fmt.Sprintf("[WARN]\t\t%v\n", err)
+		printOut(msg, yellow, nil)
+
+		request.Path = documentRoot + "/404.html"
+		return
+	}
+
 	info, err := os.Lstat(path)
 	check(err)
 
 	//シンボリックリンクの場合は、Readlink関数を利用して実パスを取得
-	//refs: https://groups.google.com/forum/#!topic/golang-nuts/jpsgja5B_Kk
-	//refs: http://golang.org/pkg/os/#ModeSymlink
 	if info.Mode()&os.ModeSymlink == os.ModeSymlink {
 		path, err = os.Readlink(path)
-	}
+		check(err)
 
-	if os.IsNotExist(err) && request.Method != "PUT" {
-		msg := fmt.Sprintf("[WARN]\t\t%v\n", err)
-		printOut(msg, yellow, nil)
-		path = documentRoot + "/404.html"
-	}
+		request.Path = documentRoot + request.Html
+		return
 
-	request.Path = path
+	} else {
+		request.Path = documentRoot + request.Html
+	}
 }
 
 /**
