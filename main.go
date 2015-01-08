@@ -19,7 +19,7 @@ import (
 	"os"
 )
 
-var cfg Config
+var cfg Config = Config{}
 
 func main() {
 	var confName = flag.String("f", "conf.gcfg", "config file")
@@ -40,7 +40,7 @@ func main() {
 		conn, err := l.Accept()
 		check(err)
 
-		go handleRequest(conn)
+		go handleRequest(conn, cfg)
 	}
 }
 
@@ -53,14 +53,14 @@ func main() {
  *
  *
  */
-func handleRequest(conn net.Conn) {
+func handleRequest(conn net.Conn, cfg Config) {
 	buf := make([]byte, 4096)
 	reqLen, err := conn.Read(buf)
 	check(err)
 
 	// 解析処理
 	contents := string(buf[:reqLen])
-	request := parseRequest(contents)
+	request := parseRequest(contents, cfg.Server.DocumentRoot)
 	println(contents)
 
 	msg := fmt.Sprintf("[INFO]\t\tmethod: %v\t action: %v",

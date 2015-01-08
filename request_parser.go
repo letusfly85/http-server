@@ -2,12 +2,16 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"regexp"
 	"strings"
 )
 
-func parseRequest(contents string) Request {
+var documentRoot string
+
+func parseRequest(contents string, docRoot string) Request {
+	documentRoot = docRoot
 	var request = Request{}
 
 	target := strings.Split(contents, "\n")
@@ -28,7 +32,9 @@ func (request *Request) parseHeader(header string) {
 	html := strings.Replace(header, method+" ", "", 1)
 
 	//TODO regexp replaceに変更する。HTTPのversionは、HTTP/x.xとして表現されるため
-	html = strings.Replace(html, " HTTP/1.1", "", 1)
+	reg4version := regexp.MustCompile("HTTP/([0-9]).([0-9])")
+	html = reg4version.ReplaceAllString(html, "")
+	//html = strings.Replace(html, " HTTP/1.1", "", 1)
 	html = strings.TrimSpace(html)
 
 	request.Html = html
@@ -50,7 +56,8 @@ func (request *Request) setRequestPath() {
 		request.Html = "/index.html"
 	}
 
-	path := cfg.Server.DocumentRoot + request.Html
+	path := documentRoot + request.Html
+	log.Println(path)
 	info, err := os.Lstat(path)
 	check(err)
 
@@ -64,7 +71,7 @@ func (request *Request) setRequestPath() {
 	if os.IsNotExist(err) && request.Method != "PUT" {
 		msg := fmt.Sprintf("[WARN]\t\t%v\n", err)
 		printOut(msg, yellow, nil)
-		path = cfg.Server.DocumentRoot + "/404.html"
+		path = documentRoot + "/404.html"
 	}
 
 	request.Path = path
