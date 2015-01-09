@@ -15,6 +15,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net"
 	"os"
 )
@@ -56,7 +57,10 @@ func main() {
 func handleRequest(conn net.Conn, cfg Config) {
 	buf := make([]byte, 4096)
 	reqLen, err := conn.Read(buf)
-	check(err)
+	if err != nil {
+		log.Fatal(err.Error())
+		return
+	}
 
 	// 解析処理
 	contents := string(buf[:reqLen])

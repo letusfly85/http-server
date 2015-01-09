@@ -8,12 +8,12 @@ import (
 
 func TestParseHeader(t *testing.T) {
 	contents := `GET /index.html HTTP/2.1
-		Host: localhost:3333
-		Connection: keep-alive
-		Accept: */*
-		User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 20_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36
-		Accept-Encoding: gzip, deflate, sdch
-		Accept-Language: ja,en-US;q=0.8,en;q=0.6
+Host: localhost:3333
+Connection: keep-alive
+Accept: */*
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 20_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36
+Accept-Encoding: gzip, deflate, sdch
+Accept-Language: ja,en-US;q=0.8,en;q=0.6
 
 
 		`
@@ -123,7 +123,9 @@ name=wada&age=99&job[where]=osaki`
 	request = Request{}
 	request.parseFormParams(header, body)
 
-	expected = map[string]string{"name": "wada", "age": "99",
+	expected = map[string]string{
+		"area": "shinagawa", "price": "1000",
+		"name": "wada", "age": "99",
 		"job[where]": "osaki"}
 	actual = request.Params
 

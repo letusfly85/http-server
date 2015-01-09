@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"regexp"
 	"strings"
@@ -92,10 +93,34 @@ func (request *Request) setRequestPath(documentRoot string) {
  *
  */
 func (request *Request) parseFormParams(header string, body string) {
+	var flg = false
 	if body == "" {
-		return
+		flg = true
 	}
 	params := make(map[string]string)
+
+	reg4version := regexp.MustCompile("HTTP/([0-9]).([0-9])")
+	header = reg4version.ReplaceAllString(header, "")
+
+	reg4params, _ := regexp.Compile("([?])(.*)")
+	header = reg4params.FindString(header)
+	header = strings.Replace(header, "?", "", 1)
+	header = strings.TrimRight(header, " ")
+
+	if header == "" && flg {
+		return
+	}
+
+	headerParams := strings.Split(header, "&")
+	for _, headerParam := range headerParams {
+		if headerParam == "" {
+			continue
+		}
+		reg4param := regexp.MustCompile("(.*)=(.*)")
+		group := reg4param.FindSubmatch([]byte(headerParam))
+		key, val := string(group[1]), string(group[2])
+		params[key] = val
+	}
 
 	conditions := strings.Split(body, "&")
 	for _, condition := range conditions {
@@ -108,4 +133,8 @@ func (request *Request) parseFormParams(header string, body string) {
 		params[key] = val
 	}
 	request.Params = params
+
+	for k, v := range params {
+		log.Printf("key[%v], value[%v]\n", k, v)
+	}
 }
