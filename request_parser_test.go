@@ -92,10 +92,11 @@ Accept-Language: ja,en-US;q=0.8,en;q=0.6
 name=wada&age=99&job[where]=osaki`
 
 	target := strings.Split(contents, "\n")
-	params := target[len(target)-1]
+	header := target[0]
+	body := target[len(target)-1]
 
 	var request = Request{}
-	request.parseFormParams(params)
+	request.parseFormParams(header, body)
 
 	expected := map[string]string{"name": "wada", "age": "99",
 		"job[where]": "osaki"}
@@ -116,10 +117,11 @@ Accept-Language: ja,en-US;q=0.8,en;q=0.6
 name=wada&age=99&job[where]=osaki`
 
 	target = strings.Split(contents, "\n")
-	params = target[len(target)-1]
+	header = target[0]
+	body = target[len(target)-1]
 
 	request = Request{}
-	request.parseFormParams(params)
+	request.parseFormParams(header, body)
 
 	expected = map[string]string{"name": "wada", "age": "99",
 		"job[where]": "osaki"}

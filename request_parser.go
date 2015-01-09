@@ -16,7 +16,7 @@ func parseRequest(contents string, documentRoot string) Request {
 
 	request.parseHeader(header)
 	request.setRequestPath(documentRoot)
-	request.parseFormParams(params)
+	request.parseFormParams(header, params)
 
 	return request
 }
@@ -91,13 +91,13 @@ func (request *Request) setRequestPath(documentRoot string) {
  *	TODO urlにパラメータ記載がある場合の処理を実装
  *
  */
-func (request *Request) parseFormParams(str string) {
-	if str == "" {
+func (request *Request) parseFormParams(header string, body string) {
+	if body == "" {
 		return
 	}
 	params := make(map[string]string)
 
-	conditions := strings.Split(str, "&")
+	conditions := strings.Split(body, "&")
 	for _, condition := range conditions {
 		if condition == "" {
 			continue
