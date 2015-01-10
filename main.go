@@ -148,8 +148,16 @@ func responsePutMethod(conn net.Conn, request Request) {
  */
 func responseDeleteMethod(conn net.Conn, request Request) {
 	//TODO 削除対象のファイルの存在チェック
-	err := os.Remove(request.Path)
+	_, err := os.Lstat(request.Path)
 	check(err)
+
+	if os.IsNotExist(err) {
+		//TODO
+		printOut("file not found", yellow, nil)
+	} else {
+		err := os.Remove(request.Path)
+		check(err)
+	}
 
 	returnStatus := "204"
 	conn.Write([]byte(returnStatus))
