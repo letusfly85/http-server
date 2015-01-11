@@ -151,14 +151,18 @@ func responseDeleteMethod(conn net.Conn, request Request) {
 	_, err := os.Lstat(request.Path)
 	check(err)
 
+	var returnStatus string
 	if os.IsNotExist(err) {
-		//TODO
-		printOut("file not found", yellow, nil)
+		msg := request.Path + " not found"
+		printOut(msg, yellow, nil)
+
+		returnStatus = "202"
 	} else {
 		err := os.Remove(request.Path)
 		check(err)
+
+		returnStatus = "204"
 	}
 
-	returnStatus := "204"
 	conn.Write([]byte(returnStatus))
 }
