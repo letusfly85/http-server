@@ -147,7 +147,6 @@ func responsePutMethod(conn net.Conn, request Request) {
  *
  */
 func responseDeleteMethod(conn net.Conn, request Request) {
-	//TODO 削除対象のファイルの存在チェック
 	_, err := os.Lstat(request.Path)
 	check(err)
 
