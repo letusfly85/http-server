@@ -89,7 +89,6 @@ func handleRequest(conn net.Conn, cfg Config) {
 		responseDeleteMethod(conn, request)
 
 	default:
-		//TODO: generate response body
 		responseGetMethod(conn, request)
 	}
 	conn.Close()
