@@ -82,7 +82,6 @@ func handleRequest(conn net.Conn, cfg Config) {
 		responsePostMethod(conn, request)
 
 	case "PUT":
-		//TODO: generate response body
 		responsePutMethod(conn, request)
 
 	case "DELETE":
@@ -132,7 +131,6 @@ func responsePostMethod(conn net.Conn, request Request) {
  *
  */
 func responsePutMethod(conn net.Conn, request Request) {
-	//TODO Bodyを受け取る口を用意（ファイルアップロードとする）
 	ioutil.WriteFile(request.Path, []byte(request.Body), 0644)
 
 	returnStatus := "204"

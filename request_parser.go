@@ -17,7 +17,13 @@ func parseRequest(contents string, documentRoot string) Request {
 
 	request.parseHeader(header)
 	request.setRequestPath(documentRoot)
-	request.parseFormParams(header, params)
+
+	if request.Method == "PUT" {
+		request.Body = params
+
+	} else {
+		request.parseFormParams(header, params)
+	}
 
 	return request
 }
@@ -48,6 +54,11 @@ func (request *Request) parseHeader(header string) {
  *
  */
 func (request *Request) setRequestPath(documentRoot string) {
+	if request.Method == "PUT" {
+		request.Path = documentRoot + request.Html
+		return
+	}
+
 	if request.Html == "/" || request.Html == "" {
 		request.Html = "/index.html"
 
@@ -60,7 +71,7 @@ func (request *Request) setRequestPath(documentRoot string) {
 	info, err := os.Lstat(path)
 
 	//ファイルの存在チェック
-	if os.IsNotExist(err) && request.Method != "PUT" {
+	if os.IsNotExist(err) {
 		msg := fmt.Sprintf("[WARN]\t\t%v\n", err)
 		printOut(msg, yellow, nil)
 
@@ -137,4 +148,5 @@ func (request *Request) parseFormParams(header string, body string) {
 	for k, v := range params {
 		log.Printf("key[%v], value[%v]\n", k, v)
 	}
+
 }
