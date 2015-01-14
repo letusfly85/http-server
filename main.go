@@ -8,10 +8,8 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net"
-	"os"
 )
 
 var cfg Config = Config{}
@@ -65,9 +63,10 @@ func handleRequest(conn net.Conn, cfg Config) {
 		request.Method, request.Html)
 	printOut(msg, green, nil)
 
+	var responce Response
 	switch request.Method {
 	case "GET":
-		responseGetMethod(conn, request)
+		responce, err = getMethod(request)
 
 	case "POST":
 		//TODO: generate response body
@@ -82,77 +81,11 @@ func handleRequest(conn net.Conn, cfg Config) {
 		responseDeleteMethod(conn, request)
 
 	default:
-		responseGetMethod(conn, request)
+		responseDeleteMethod(conn, request)
 	}
+	check(err)
+	conn.Write(responce.Body)
+
 	conn.Close()
 	io.Copy(conn, conn)
-}
-
-/**
- *  GET要求への処理
- *
- * TODO:
- *   page要求とfavicon要求が来た際に、
- *   両方を返却してブラウザ編集が継続できるように改修
- *
- */
-func responseGetMethod(conn net.Conn, request Request) {
-	htmlData, err := ioutil.ReadFile(request.Path)
-	check(err)
-
-	conn.Write(htmlData)
-}
-
-/**
- * * POST要求への処理
- *
- * TODO: 存在しないaction指定の場合は、RoutingErrorを返却させる
- * TODO: multiForm対応させる
- *
- */
-func responsePostMethod(conn net.Conn, request Request) {
-	htmlData, err := ioutil.ReadFile(request.Path)
-	check(err)
-
-	conn.Write(htmlData)
-}
-
-/**
- * PUT要求への処理
- *
- * リソースが存在しない場合は新規で作成し、
- * リソースが存在する場合は上書き実施
- *
- */
-func responsePutMethod(conn net.Conn, request Request) {
-	ioutil.WriteFile(request.Path, []byte(request.Body), 0644)
-
-	returnStatus := "204"
-	conn.Write([]byte(returnStatus))
-}
-
-/**
- * DELETE要求への処理
- *
- * リソースが存在する場合は削除する
- *
- */
-func responseDeleteMethod(conn net.Conn, request Request) {
-	_, err := os.Lstat(request.Path)
-	check(err)
-
-	var returnStatus string
-	if os.IsNotExist(err) {
-		msg := request.Path + " not found"
-		printOut(msg, yellow, nil)
-
-		returnStatus = "202"
-	} else {
-		err := os.Remove(request.Path)
-		check(err)
-
-		returnStatus = "204"
-	}
-
-	conn.Write([]byte(returnStatus))
 }

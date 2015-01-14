@@ -1,6 +1,6 @@
 package main
 
 type Response struct {
-	Status   string
-	Contents string
+	Status string
+	Body   []byte
 }
