@@ -63,28 +63,26 @@ func handleRequest(conn net.Conn, cfg Config) {
 		request.Method, request.Html)
 	printOut(msg, green, nil)
 
-	var responce Response
+	var response Response
 	switch request.Method {
 	case "GET":
-		responce, err = getMethod(request)
+		response, err = getMethod(request)
 
 	case "POST":
 		//TODO: generate response body
-		msg := "[INFO]\t\t:go to post action."
-		printOut(msg, green, nil)
-		responsePostMethod(conn, request)
+		response, err = postMethod(request)
 
 	case "PUT":
-		responsePutMethod(conn, request)
+		response, err = putMethod(request)
 
 	case "DELETE":
-		responseDeleteMethod(conn, request)
+		response, err = deleteMethod(request)
 
 	default:
-		responseDeleteMethod(conn, request)
+		response, err = getMethod(request)
 	}
 	check(err)
-	conn.Write(responce.Body)
+	conn.Write(response.Body)
 
 	conn.Close()
 	io.Copy(conn, conn)

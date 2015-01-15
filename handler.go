@@ -2,7 +2,6 @@ package main
 
 import (
 	"io/ioutil"
-	"net"
 	"os"
 )
 
@@ -20,7 +19,6 @@ func getMethod(request Request) (response Response, err error) {
 	response = Response{}
 	response.Body = htmlData
 	return response, err
-	//conn.Write(htmlData)
 }
 
 /**
@@ -30,11 +28,12 @@ func getMethod(request Request) (response Response, err error) {
  * TODO: multiForm対応させる
  *
  */
-func responsePostMethod(conn net.Conn, request Request) {
+func postMethod(request Request) (response Response, err error) {
 	htmlData, err := ioutil.ReadFile(request.Path)
-	check(err)
 
-	conn.Write(htmlData)
+	response = Response{}
+	response.Body = htmlData
+	return response, err
 }
 
 /**
@@ -43,14 +42,13 @@ func responsePostMethod(conn net.Conn, request Request) {
  * リソースが存在しない場合は新規で作成し、
  * リソースが存在する場合は上書き実施
  *
- * TODO: メソッドの引数改修
- *
  */
-func responsePutMethod(conn net.Conn, request Request) {
+func putMethod(request Request) (response Response, err error) {
 	ioutil.WriteFile(request.Path, []byte(request.Body), 0644)
 
-	returnStatus := "204"
-	conn.Write([]byte(returnStatus))
+	response = Response{}
+	response.Status = "204"
+	return response, nil
 }
 
 /**
@@ -58,25 +56,20 @@ func responsePutMethod(conn net.Conn, request Request) {
  *
  * リソースが存在する場合は削除する
  *
- * TODO: メソッドの引数改修
- *
  */
-func responseDeleteMethod(conn net.Conn, request Request) {
-	_, err := os.Lstat(request.Path)
-	check(err)
+func deleteMethod(request Request) (response Response, err error) {
+	_, err = os.Lstat(request.Path)
 
-	var returnStatus string
 	if os.IsNotExist(err) {
 		msg := request.Path + " not found"
 		printOut(msg, yellow, nil)
 
-		returnStatus = "202"
+		response.Status = "202"
 	} else {
-		err := os.Remove(request.Path)
-		check(err)
+		err = os.Remove(request.Path)
 
-		returnStatus = "204"
+		response.Status = "204"
 	}
 
-	conn.Write([]byte(returnStatus))
+	return response, err
 }
