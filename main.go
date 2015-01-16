@@ -50,8 +50,9 @@ func handleRequest(conn net.Conn, cfg Config) {
 	buf := make([]byte, 4096)
 	reqLen, err := conn.Read(buf)
 	if err != nil {
-		log.Fatal(err.Error())
-		return
+		//TODO favicon.icoがうまく取得できていない様子
+		log.Println("error handleRequest")
+		log.Println(err.Error())
 	}
 
 	// 解析処理
@@ -82,8 +83,8 @@ func handleRequest(conn net.Conn, cfg Config) {
 		response, err = getMethod(request)
 	}
 	check(err)
-	conn.Write(response.Body)
+	conn.Write(response.generateResponce())
 
-	conn.Close()
 	io.Copy(conn, conn)
+	conn.Close()
 }

@@ -17,6 +17,7 @@ func getMethod(request Request) (response Response, err error) {
 	htmlData, err := ioutil.ReadFile(request.Path)
 
 	response = Response{}
+	response.Status = "200"
 	response.Body = htmlData
 	return response, err
 }
