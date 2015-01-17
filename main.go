@@ -7,7 +7,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io"
 	"log"
 	"net"
 )
@@ -50,7 +49,11 @@ func handleRequest(conn net.Conn, cfg Config) {
 	buf := make([]byte, 4096)
 	reqLen, err := conn.Read(buf)
 	if err != nil {
-		//TODO favicon.icoがうまく取得できていない様子
+		if err.Error() == "EOF" {
+			log.Println("return")
+			conn.Close()
+			return
+		}
 		log.Println("error handleRequest")
 		log.Println(err.Error())
 	}
@@ -85,6 +88,6 @@ func handleRequest(conn net.Conn, cfg Config) {
 	check(err)
 	conn.Write(response.generateResponce())
 
-	io.Copy(conn, conn)
+	//io.Copy(conn, conn)
 	conn.Close()
 }
