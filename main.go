@@ -60,7 +60,8 @@ func handleRequest(conn net.Conn, cfg Config) {
 
 	// 解析処理
 	contents := string(buf[:reqLen])
-	request := parseRequest(contents, cfg.Server.DocumentRoot)
+	docRoot := cfg.Server.DocumentRoot
+	request := parseRequest(contents, docRoot)
 	println(contents)
 
 	msg := fmt.Sprintf("[INFO]\t\tmethod: %v\t action: %v",
@@ -71,6 +72,9 @@ func handleRequest(conn net.Conn, cfg Config) {
 	switch request.Method {
 	case "GET":
 		response, err = getMethod(request)
+		if docRoot+"/404.html" == request.Path {
+			response.Status = "404"
+		}
 
 	case "POST":
 		//TODO: generate response body
