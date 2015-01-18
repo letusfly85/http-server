@@ -48,7 +48,9 @@ func putMethod(request Request) (response Response, err error) {
 	ioutil.WriteFile(request.Path, []byte(request.Body), 0644)
 
 	response = Response{}
-	response.Status = "204"
+	response.Status = "201"
+	response.Body = []byte(request.Html)
+
 	return response, nil
 }
 
