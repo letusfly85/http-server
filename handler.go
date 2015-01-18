@@ -25,14 +25,16 @@ func getMethod(request Request) (response Response, err error) {
 /**
  * * POST要求への処理
  *
- * TODO: 存在しないaction指定の場合は、RoutingErrorを返却させる
- * TODO: multiForm対応させる
- *
  */
 func postMethod(request Request) (response Response, err error) {
 	htmlData, err := ioutil.ReadFile(request.Path)
 
+	//TODO channelを利用して、本サーバを待ち受けているサービス確認をする
+	//TODO サービスが存在する場合は、処理を異常してステータスコードとボディを取得する
+	//TODO 一定時間待ち受けてレスポンスがなかった場合は502としてエラー対応する
+
 	response = Response{}
+	response.Status = "502"
 	response.Body = htmlData
 	return response, err
 }

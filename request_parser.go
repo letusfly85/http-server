@@ -54,7 +54,7 @@ func (request *Request) parseHeader(header string) {
  *
  */
 func (request *Request) setRequestPath(documentRoot string) {
-	if request.Method == "PUT" {
+	if request.Method == "PUT" || request.Method == "POST" {
 		request.Path = documentRoot + request.Html
 		return
 	}
