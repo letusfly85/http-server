@@ -88,6 +88,5 @@ func handleRequest(conn net.Conn, cfg Config) {
 	check(err)
 	conn.Write(response.generateResponce())
 
-	//io.Copy(conn, conn)
-	conn.Close()
+	defer conn.Close()
 }
