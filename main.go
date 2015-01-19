@@ -71,10 +71,7 @@ func handleRequest(conn net.Conn, cfg Config) {
 	var response Response
 	switch request.Method {
 	case "GET":
-		response, err = getMethod(request)
-		if docRoot+"/404.html" == request.Path {
-			response.Status = "404"
-		}
+		response, err = getMethod(request, docRoot)
 
 	case "POST":
 		//TODO: generate response body
@@ -87,7 +84,7 @@ func handleRequest(conn net.Conn, cfg Config) {
 		response, err = deleteMethod(request)
 
 	default:
-		response, err = getMethod(request)
+		response, err = getMethod(request, docRoot)
 	}
 	check(err)
 	conn.Write(response.generateResponce())

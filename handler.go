@@ -13,12 +13,15 @@ import (
  *   両方を返却してブラウザ編集が継続できるように改修
  *
  */
-func getMethod(request Request) (response Response, err error) {
-	htmlData, err := ioutil.ReadFile(request.Path)
-
+func getMethod(request Request, docRoot string) (response Response, err error) {
 	response = Response{}
 	response.Status = "200"
+	if docRoot+"/404.html" == request.Path {
+		response.Status = "404"
+	}
+	htmlData, err := ioutil.ReadFile(request.Path)
 	response.Body = htmlData
+
 	return response, err
 }
 
