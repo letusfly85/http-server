@@ -1,12 +1,21 @@
 package main
 
-import "testing"
+import (
+	"io/ioutil"
+	"testing"
+)
 
 func TestGetMethod(t *testing.T) {
-	actual := 1
-	expected := 1
+	docRoot := "test/html"
+	request := Request{}
+	request.Path = docRoot + "/index.html"
 
-	if expected != actual {
+	response, _ := getMethod(request, docRoot)
+
+	actual := string(response.Body)
+	expected, _ := ioutil.ReadFile("test/html/index.html")
+
+	if string(expected) != actual {
 		t.Errorf("got %v, want %v", actual, expected)
 	}
 }
